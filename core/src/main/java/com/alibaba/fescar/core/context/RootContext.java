@@ -27,6 +27,9 @@ public class RootContext {
 
     public static final String KEY_XID = "TX_XID";
 
+    /**
+     * ThreadLocal Map
+     */
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     public static String getXID() {
