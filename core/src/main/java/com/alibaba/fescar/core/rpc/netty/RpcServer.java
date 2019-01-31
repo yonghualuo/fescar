@@ -140,7 +140,9 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
         }
+        // disconnect from the remote peer
         ctx.disconnect();
+        // close the channel
         ctx.close();
     }
 
@@ -304,7 +306,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      *
      * @param msgId the msg id
      * @param ctx   the ctx
-     * @param msg   the msg
+     * @param msg   the msg (rpcMessage body)
      */
     @Override
     public void dispatch(long msgId, ChannelHandlerContext ctx, Object msg) {

@@ -36,6 +36,10 @@ public class DefaultLockManagerImpl implements LockManager {
 
     private static final int BUCKET_PER_TABLE = 128;
 
+    /**
+     * 全局资源锁
+     * LOCK_MAP => (resourceId) -> (tableName) -> (bucket, pk hashcode)
+      */
     private static final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>> LOCK_MAP = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
 
     @Override
@@ -53,8 +57,11 @@ public class DefaultLockManagerImpl implements LockManager {
         if(StringUtils.isEmpty(lockKey)) {
             return true;
         }
-        
-            String[] tableGroupedLockKeys = lockKey.split(";");
+
+        /**
+         * lockKey: " tableName1:pk1,pk2;tableName2:pk1,pk2"
+         */
+        String[] tableGroupedLockKeys = lockKey.split(";");
         for (String tableGroupedLockKey : tableGroupedLockKeys) {
             int idx = tableGroupedLockKey.indexOf(":");
             if (idx < 0) {
@@ -91,7 +98,7 @@ public class DefaultLockManagerImpl implements LockManager {
                     } else if (lockingTransactionId.longValue() == transactionId) {
                         // Locked by me
                         continue;
-                    } else {
+                    } else { // Locked by other, release locks
                         LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + lockingTransactionId);
                         branchSession.unlock(); // Release all acquired locks.
                         return false;

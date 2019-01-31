@@ -46,19 +46,23 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable,M
     @Override
     public byte[] encode() {
         int bufferSize = msgs.size() * 1024;
+        // allocate memory
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
+        // write msg size
         byteBuffer.putShort((short) msgs.size());
+        // 依次写入msg的typeCode和内容
         for (AbstractMessage msg : msgs) {
             //msg.setChannelHandlerContext(ctx);
             byte[] data = msg.encode();
             byteBuffer.putShort(msg.getTypeCode());
             byteBuffer.put(data);
         }
-
+        // 重置position和limit
         byteBuffer.flip();
         int length = byteBuffer.limit();
         byte[] content = new byte[length + 4];
         intToBytes(length, content, 0);
+        // 将byteBuffer中的内容拷贝到content中
         byteBuffer.get(content, 4, length);
         if (msgs.size() > 20) {
             if (LOGGER.isDebugEnabled()) {

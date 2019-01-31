@@ -314,6 +314,8 @@ public class ChannelManager {
     /**
      * Gets get channel.
      *
+     * RM_CHANNELS => (db key) -> (the client app name) -> (the client ip) -> (port)
+     *
      * @param resourceId    the db key
      * @param clientIp      the client ip
      * @param clientAppName the client app name

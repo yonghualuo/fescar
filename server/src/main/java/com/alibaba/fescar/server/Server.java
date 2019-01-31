@@ -54,6 +54,9 @@ public class Server {
         if (args.length > 1) {
             dataDir = args[1];
         }
+        if (dataDir == null) {
+            dataDir = System.getProperty("dataDir");
+        }
         SessionHolder.init(dataDir);
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);

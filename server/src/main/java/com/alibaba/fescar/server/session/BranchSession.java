@@ -52,7 +52,43 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
+    /**
+     * Map<String, Long> 即 (pk, transactionId)
+     * Set<String>, 即 <pk1,pk2...>
+     */
     private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
+
+    @Override
+    public boolean lock() throws TransactionException {
+        return LockManagerFactory.get().acquireLock(this);
+    }
+
+    @Override
+    public boolean unlock() throws TransactionException {
+        if (lockHolder.size() == 0) {
+            return true;
+        }
+        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
+            Map<String, Long> bucket = entry.getKey();
+            Set<String> keys = entry.getValue();
+            synchronized (bucket) {
+                for (String key : keys) {
+                    Long v = bucket.get(key);
+                    if (v == null) {
+                        continue;
+                    }
+                    // 删除当前分支id ?? 可能是考虑优先释放该资源, 提高效率
+                    if (v.longValue() == getTransactionId()) {
+                        bucket.remove(key);
+                    }
+                }
+            }
+        }
+        lockHolder.clear();
+        return true;
+    }
 
     public String getApplicationData() {
         return applicationData;
@@ -156,36 +192,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return lockHolder;
     }
 
-    @Override
-    public boolean lock() throws TransactionException {
-        return LockManagerFactory.get().acquireLock(this);
-    }
-
-    @Override
-    public boolean unlock() throws TransactionException {
-        if (lockHolder.size() == 0) {
-            return true;
-        }
-        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
-            Map<String, Long> bucket = entry.getKey();
-            Set<String> keys = entry.getValue();
-            synchronized (bucket) {
-                for (String key : keys) {
-                    Long v = bucket.get(key);
-                    if (v == null) {
-                        continue;
-                    }
-                    if (v.longValue() == getTransactionId()) {
-                        bucket.remove(key);
-                    }
-                }
-            }
-        }
-        lockHolder.clear();
-        return true;
-    }
 
     @Override
     public byte[] encode() {

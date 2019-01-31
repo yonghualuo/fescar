@@ -35,6 +35,10 @@ import org.slf4j.LoggerFactory;
 
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.*;
 
+/**
+ * Global commit / rollback
+ *
+ */
 public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);

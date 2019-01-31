@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractSessionManager implements SessionManager, SessionLifecycleListener {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSessionManager.class);
-
+    // save global session
     protected Map<Long, GlobalSession> sessionMap = new ConcurrentHashMap<>();
 
     protected TransactionStoreManager transactionStoreManager;
