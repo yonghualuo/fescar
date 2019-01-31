@@ -33,4 +33,4 @@ Thumbs.db
 *.class
 
 # data
-./data
+data
