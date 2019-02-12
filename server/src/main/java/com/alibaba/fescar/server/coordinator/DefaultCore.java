@@ -52,8 +52,12 @@ public class DefaultCore implements Core {
         this.resourceManagerInbound = resourceManagerInbound;
     }
 
+    /**
+     * 注册子事务
+     */
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+        // 验证globalSession
         GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
 
         BranchSession branchSession = new BranchSession();
@@ -105,6 +109,9 @@ public class DefaultCore implements Core {
         globalSession.changeBranchStatus(branchSession, status);
     }
 
+    /**
+     * 判断是否持有锁🔒
+     */
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
         if (branchType == BranchType.AT) {
@@ -120,7 +127,7 @@ public class DefaultCore implements Core {
         GlobalSession session = GlobalSession.createGlobalSession(
                 applicationId, transactionServiceGroup, name, timeout);
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-
+        // 🔛事务
         session.begin();
 
         return XID.generateXID(session.getTransactionId());
@@ -137,6 +144,7 @@ public class DefaultCore implements Core {
         globalSession.closeAndClean(); // Highlight: Firstly, close the session, then no more branch can be registered.
 
         if (status == GlobalStatus.Begin) {
+            // 是否是AT模式
             if (globalSession.canBeCommittedAsync()) {
                 asyncCommit(globalSession);
             } else {
@@ -252,6 +260,7 @@ public class DefaultCore implements Core {
 
     @Override
     public void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        // 倒置所有子事务
         for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
             BranchStatus currentBranchStatus = branchSession.getStatus();
             if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {

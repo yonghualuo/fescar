@@ -18,10 +18,10 @@ package com.alibaba.fescar.core.model;
 
 public enum BranchType {
 
-    // AT Branch
+    // AT Branch 自动
     AT,
 
-    // MT Branch
+    // MT Branch 手动
     MT;
 
     public static BranchType get(byte ordinal) {

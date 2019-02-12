@@ -141,6 +141,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         lifecycleListeners.remove(sessionLifecycleListener);
     }
 
+    /**
+     * ®️注册子事务分支
+     * @param branchSession
+     * @throws TransactionException
+     */
     @Override
     public void addBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
