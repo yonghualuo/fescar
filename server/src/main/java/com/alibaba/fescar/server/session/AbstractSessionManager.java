@@ -31,7 +31,7 @@ import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractSessionManager implements SessionManager, SessionLifecycleListener {
+public abstract class AbstractSessionManager implements SessionManager {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSessionManager.class);
 

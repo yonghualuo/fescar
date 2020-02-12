@@ -135,6 +135,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     @Override
     public void init() {
+        // {@link this#start()}
         NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
         nettyClientKeyPool = new GenericKeyedObjectPool(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());

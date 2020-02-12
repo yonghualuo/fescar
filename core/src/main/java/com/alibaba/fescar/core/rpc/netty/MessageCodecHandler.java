@@ -112,6 +112,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int begin = in.readerIndex();
+        // get magic header
         int magicIndex = getMagicIndex(in);
         if (magicIndex == NOT_FOUND_INDEX) {
             LOGGER.error("codec decode not found magic offset");
@@ -130,21 +131,25 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         in.readBytes(buffer);
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         short magic = byteBuffer.getShort();
-        if (magic != MAGIC) {
+        if (magic != MAGIC) { // 2
             LOGGER.error("decode error,will close channel:" + ctx.channel());
             ctx.channel().close();
             return;
         }
 
-        int flag = byteBuffer.getShort();
+        int flag = byteBuffer.getShort(); // 2
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
         boolean isFescarCodec = (FLAG_FESCAR_CODEC & flag) > 0;
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isFescarCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
-        long msgId = byteBuffer.getLong();
+        if (!isFescarCodec) {
+            bodyLength = byteBuffer.getShort(); // 2
+        } else {
+            typeCode = byteBuffer.getShort();
+        }
+        long msgId = byteBuffer.getLong(); // 8
 
         if (isHeartbeat) {
             RpcMessage rpcMessage = new RpcMessage();
@@ -163,6 +168,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             return;
         }
 
+        // 处理半包，重置readerIndex
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
             in.readerIndex(begin);
             return;

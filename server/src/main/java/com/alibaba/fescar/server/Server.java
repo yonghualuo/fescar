@@ -58,7 +58,7 @@ public class Server {
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+        rpcServer.setHandler(coordinator);
 
         UUIDGenerator.init(1);
 
